@@ -1,8 +1,8 @@
 # Puppeteer Mods — R.E.P.O
 
-Install these to join a **Puppeteer host's** lobby and let their stream commands affect
+Install these to join my **Puppeteer's** lobby and let my stream commands affect
 your game (turn you into a monster, scale you, etc.). You only need these if you're
-playing **with** a host — you don't run any app yourself.
+playing **with** a host (which is me, itsjmikee) — you don't run any app yourself.
 
 ## Requirements
 - **R.E.P.O** (Steam)
