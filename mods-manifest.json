@@ -1,10 +1,10 @@
 {
-  "updatedAt": "2026-06-08T00:41:48.608Z",
+  "updatedAt": "2026-06-08T01:41:08.907Z",
   "files": [
     {
       "name": "PuppeteerMod.dll",
       "path": "repo/PuppeteerMod/PuppeteerMod.dll",
-      "bytes": 89600
+      "bytes": 92672
     },
     {
       "name": "PlayableMonsters.dll",
