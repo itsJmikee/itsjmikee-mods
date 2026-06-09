@@ -33,7 +33,19 @@ Write-Host "R.E.P.O: $REPO"
 $plugins = Join-Path $REPO "BepInEx\plugins"
 
 # --- BepInEx (mod loader) ---
-if (-not (Test-Path (Join-Path $REPO "winhttp.dll"))) {
+# Reinstall fresh if it's MISSING, INCOMPLETE (no preloader), or a Thunderstore Mod
+# Manager left a half-managed setup (.thunderstoremm). That last case is the silent killer:
+# all files look present but the Thunderstore doorstop fights a direct Steam launch, so the
+# game never shows "[MODDED]" and no mods load. Wipe the loader + leftovers, install clean.
+$tsLeftover = Test-Path (Join-Path $REPO ".thunderstoremm")
+$bepComplete = (Test-Path (Join-Path $REPO "winhttp.dll")) -and (Test-Path (Join-Path $REPO "BepInEx\core\BepInEx.Preloader.dll"))
+if ((-not $bepComplete) -or $tsLeftover) {
+  if ($tsLeftover -or (Test-Path (Join-Path $REPO "winhttp.dll"))) {
+    Write-Host "Cleaning old/partial BepInEx (Thunderstore leftover or incomplete)..." -ForegroundColor Yellow
+    foreach ($x in @("BepInEx","winhttp.dll","doorstop_config.ini",".doorstop_version",".thunderstoremm","dotnet")) {
+      Remove-Item (Join-Path $REPO $x) -Recurse -Force -ErrorAction SilentlyContinue
+    }
+  }
   Write-Host "Installing BepInEx 5..." -ForegroundColor Cyan
   $bz = Join-Path $env:TEMP "bepinex.zip"
   Invoke-WebRequest "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.2/BepInEx_win_x64_5.4.23.2.zip" -OutFile $bz -UseBasicParsing
@@ -72,6 +84,25 @@ foreach ($j in $jobs) {
   Invoke-WebRequest $j.u -OutFile $j.f -UseBasicParsing
   Write-Host "  $([System.IO.Path]::GetFileName($j.f))" -ForegroundColor Green
 }
+
+# --- Unblock + console ---
+# Windows tags downloaded DLLs with "mark of the web"; that can stop winhttp.dll loading as
+# the proxy (BepInEx silently never starts). Unblock everything. Then enable the BepInEx
+# console window (off by default) so you get the same debug console the host has.
+Write-Host "Unblocking files + enabling console..." -ForegroundColor Cyan
+Get-ChildItem $REPO -Recurse -File -ErrorAction SilentlyContinue | Unblock-File -ErrorAction SilentlyContinue
+$cfg = Join-Path $REPO "BepInEx\config\BepInEx.cfg"
+try {
+  New-Item -ItemType Directory -Force (Split-Path $cfg) | Out-Null
+  if (Test-Path $cfg) {
+    $c = Get-Content $cfg -Raw
+    if ($c -match '(?ms)\[Logging\.Console\].*?Enabled\s*=\s*\w+') { $c = $c -replace '(?ms)(\[Logging\.Console\][^\[]*?Enabled\s*=\s*)\w+', '${1}true' }
+    else { $c += "`r`n[Logging.Console]`r`nEnabled = true`r`n" }
+    Set-Content $cfg $c -Encoding UTF8
+  } else {
+    "[Logging.Console]`r`nEnabled = true`r`n" | Set-Content $cfg -Encoding UTF8
+  }
+} catch { Write-Host "(couldn't set console config: $($_.Exception.Message))" -ForegroundColor Yellow }
 
 Write-Host "All set! Launching R.E.P.O..." -ForegroundColor Green
 Start-Process "steam://rungameid/$APPID"
