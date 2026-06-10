@@ -1,5 +1,8 @@
 # Puppeteer co-op partner installer. Finds R.E.P.O, installs BepInEx + ScalerCore if
 # missing, pulls the host's latest Puppeteer mods, then launches the game.
+# Pass -RepoPath "C:\...\REPO" (or set PUPPETEER_REPO) to FORCE the folder — use the one
+# Steam shows under "Browse local files", since a hand-moved game won't be auto-found.
+param([string]$RepoPath = $env:PUPPETEER_REPO)
 $ErrorActionPreference = "Stop"
 $RAW   = "https://raw.githubusercontent.com/itsJmikee/itsjmikee-mods/main/repo"
 $APPID = "3241660"   # R.E.P.O Steam app id
@@ -23,10 +26,13 @@ function Find-Repo {
 }
 
 Write-Host "=== Puppeteer co-op mods installer ===" -ForegroundColor Cyan
-$REPO = Find-Repo
+# Explicit -RepoPath wins (for hand-moved installs Steam launches from a different folder
+# than where the game files sit). Then auto-find. Then ask.
+if ($RepoPath -and (Test-Path (Join-Path $RepoPath "REPO.exe"))) { $REPO = $RepoPath; Write-Host "Using forced path." -ForegroundColor Cyan }
+else { $REPO = Find-Repo }
 if (-not $REPO) {
   Write-Host "Couldn't auto-find R.E.P.O." -ForegroundColor Yellow
-  $REPO = Read-Host "Paste your R.E.P.O folder (the one with REPO.exe)"
+  $REPO = Read-Host "Paste your R.E.P.O folder (the one with REPO.exe — use Steam > Browse local files)"
 }
 if (-not (Test-Path (Join-Path $REPO "REPO.exe"))) { Write-Host "That folder has no REPO.exe. Aborting." -ForegroundColor Red; exit 1 }
 Write-Host "R.E.P.O: $REPO"
