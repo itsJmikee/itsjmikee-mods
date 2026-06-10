@@ -91,6 +91,22 @@ foreach ($j in $jobs) {
   Write-Host "  $([System.IO.Path]::GetFileName($j.f))" -ForegroundColor Green
 }
 
+# --- Sound pack (host's custom sounds so play_sound works on your machine) ---
+# The mod reads sounds from the game's audio cache; pull the host's shared pack into it.
+$audioCache = Join-Path $env:USERPROFILE "AppData\LocalLow\semiwork\Repo\Cache\Audio"
+try {
+  $sm = Invoke-WebRequest "$RAW/sounds-manifest.json" -UseBasicParsing -ErrorAction Stop
+  $sounds = ($sm.Content | ConvertFrom-Json).sounds
+  if ($sounds -and $sounds.Count -gt 0) {
+    Write-Host "Pulling $($sounds.Count) shared sound(s)..." -ForegroundColor Cyan
+    New-Item -ItemType Directory -Force $audioCache | Out-Null
+    foreach ($s in $sounds) {
+      try { Invoke-WebRequest "$RAW/sounds/$([uri]::EscapeDataString($s))" -OutFile (Join-Path $audioCache $s) -UseBasicParsing -ErrorAction Stop } catch {}
+    }
+    Write-Host "  sounds synced." -ForegroundColor Green
+  }
+} catch { Write-Host "  (no shared sound pack yet)" -ForegroundColor DarkGray }
+
 # --- Unblock + console ---
 # Windows tags downloaded DLLs with "mark of the web"; that can stop winhttp.dll loading as
 # the proxy (BepInEx silently never starts). Unblock everything. Then enable the BepInEx
