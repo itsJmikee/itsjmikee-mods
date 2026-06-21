@@ -1,6 +1,6 @@
-# Puppeteer Mods — R.E.P.O
+# LiveReins Mods — R.E.P.O
 
-Install these to join a **Puppeteer host's** lobby and let their stream commands affect
+Install these to join a **LiveReins host's** lobby and let their stream commands affect
 your game (turn you into a monster, scale you, etc.). You only need these if you're
 playing **with** a host — you don't run any app yourself.
 
@@ -24,7 +24,7 @@ playing **with** a host — you don't run any app yourself.
 Put these two folders into your R.E.P.O `BepInEx\plugins\` folder:
 
 ```
-<REPO>\BepInEx\plugins\PuppeteerMod\PuppeteerMod.dll
+<REPO>\BepInEx\plugins\LiveReinsMod\LiveReinsMod.dll
 <REPO>\BepInEx\plugins\PlayableMonsters\PlayableMonsters.dll
 ```
 

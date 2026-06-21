@@ -1,5 +1,5 @@
-# Puppeteer co-op partner installer. Finds R.E.P.O, installs BepInEx + ScalerCore if
-# missing, pulls the host's latest Puppeteer mods, then launches the game.
+# LiveReins co-op partner installer. Finds R.E.P.O, installs BepInEx + ScalerCore if
+# missing, pulls the host's latest LiveReins mods, then launches the game.
 # Pass -RepoPath "C:\...\REPO" (or set PUPPETEER_REPO) to FORCE the folder — use the one
 # Steam shows under "Browse local files", since a hand-moved game won't be auto-found.
 param([string]$RepoPath = $env:PUPPETEER_REPO)
@@ -25,7 +25,7 @@ function Find-Repo {
   return $null
 }
 
-Write-Host "=== Puppeteer co-op mods installer ===" -ForegroundColor Cyan
+Write-Host "=== LiveReins co-op mods installer ===" -ForegroundColor Cyan
 # Explicit -RepoPath wins (for hand-moved installs Steam launches from a different folder
 # than where the game files sit). Then auto-find. Then ask.
 if ($RepoPath -and (Test-Path (Join-Path $RepoPath "REPO.exe"))) { $REPO = $RepoPath; Write-Host "Using forced path." -ForegroundColor Cyan }
@@ -79,10 +79,10 @@ if (-not $hasScaler) {
   } catch { Write-Host "ScalerCore auto-install failed ($($_.Exception.Message)). Install 'ScalerCore' from Thunderstore manually." -ForegroundColor Yellow }
 } else { Write-Host "ScalerCore already installed." }
 
-# --- Puppeteer mods (always pull the host's latest) ---
-Write-Host "Updating Puppeteer mods..." -ForegroundColor Cyan
+# --- LiveReins mods (always pull the host's latest) ---
+Write-Host "Updating LiveReins mods..." -ForegroundColor Cyan
 $jobs = @(
-  @{ u = "$RAW/PuppeteerMod/PuppeteerMod.dll";       f = (Join-Path $plugins "PuppeteerMod\PuppeteerMod.dll") },
+  @{ u = "$RAW/LiveReinsMod/LiveReinsMod.dll";       f = (Join-Path $plugins "LiveReinsMod\LiveReinsMod.dll") },
   @{ u = "$RAW/PlayableMonsters/PlayableMonsters.dll"; f = (Join-Path $plugins "PlayableMonsters\PlayableMonsters.dll") }
 )
 foreach ($j in $jobs) {
