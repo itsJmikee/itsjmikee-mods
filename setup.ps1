@@ -7,6 +7,10 @@ $ErrorActionPreference = "Stop"
 $RAW   = "https://raw.githubusercontent.com/itsJmikee/itsjmikee-mods/main/repo"
 $APPID = "3241660"   # R.E.P.O Steam app id
 
+# raw.githubusercontent caches files ~5 min per edge, so a fresh push (new DLL or manifest)
+# can be served stale for a few minutes. Append a unique token to force an immediate fetch.
+function NoCache([string]$u) { return $u + $(if ($u.Contains('?')) { '&' } else { '?' }) + 'cb=' + [DateTimeOffset]::Now.Ticks }
+
 function Find-Repo {
   $cands = New-Object System.Collections.Generic.List[string]
   $cands.Add("C:\Program Files (x86)\Steam\steamapps\common\REPO")
@@ -97,7 +101,7 @@ $jobs = @(
 )
 foreach ($j in $jobs) {
   New-Item -ItemType Directory -Force (Split-Path $j.f) | Out-Null
-  Invoke-WebRequest $j.u -OutFile $j.f -UseBasicParsing
+  Invoke-WebRequest (NoCache $j.u) -OutFile $j.f -UseBasicParsing
   Write-Host "  $([System.IO.Path]::GetFileName($j.f))" -ForegroundColor Green
 }
 
@@ -105,13 +109,13 @@ foreach ($j in $jobs) {
 # The mod reads sounds from the game's audio cache; pull the host's shared pack into it.
 $audioCache = Join-Path $env:USERPROFILE "AppData\LocalLow\semiwork\Repo\Cache\Audio"
 try {
-  $sm = Invoke-WebRequest "$RAW/sounds-manifest.json" -UseBasicParsing -ErrorAction Stop
+  $sm = Invoke-WebRequest (NoCache "$RAW/sounds-manifest.json") -UseBasicParsing -ErrorAction Stop
   $sounds = ($sm.Content | ConvertFrom-Json).sounds
   if ($sounds -and $sounds.Count -gt 0) {
     Write-Host "Pulling $($sounds.Count) shared sound(s)..." -ForegroundColor Cyan
     New-Item -ItemType Directory -Force $audioCache | Out-Null
     foreach ($s in $sounds) {
-      try { Invoke-WebRequest "$RAW/sounds/$([uri]::EscapeDataString($s))" -OutFile (Join-Path $audioCache $s) -UseBasicParsing -ErrorAction Stop } catch {}
+      try { Invoke-WebRequest (NoCache "$RAW/sounds/$([uri]::EscapeDataString($s))") -OutFile (Join-Path $audioCache $s) -UseBasicParsing -ErrorAction Stop } catch {}
     }
     Write-Host "  sounds synced." -ForegroundColor Green
   }
