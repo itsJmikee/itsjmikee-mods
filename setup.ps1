@@ -1,6 +1,6 @@
 # LiveReins co-op partner installer. Finds R.E.P.O, installs BepInEx + ScalerCore if
 # missing, pulls the host's latest LiveReins mods, then launches the game.
-# Pass -RepoPath "C:\...\REPO" (or set LIVEREINS_REPO) to FORCE the folder — use the one
+# Pass -RepoPath "C:\...\REPO" (or set LIVEREINS_REPO) to FORCE the folder - use the one
 # Steam shows under "Browse local files", since a hand-moved game won't be auto-found.
 param([string]$RepoPath = $env:LIVEREINS_REPO)
 $ErrorActionPreference = "Stop"
@@ -32,7 +32,7 @@ if ($RepoPath -and (Test-Path (Join-Path $RepoPath "REPO.exe"))) { $REPO = $Repo
 else { $REPO = Find-Repo }
 if (-not $REPO) {
   Write-Host "Couldn't auto-find R.E.P.O." -ForegroundColor Yellow
-  $REPO = Read-Host "Paste your R.E.P.O folder (the one with REPO.exe — use Steam > Browse local files)"
+  $REPO = Read-Host "Paste your R.E.P.O folder (the one with REPO.exe - use Steam > Browse local files)"
 }
 if (-not (Test-Path (Join-Path $REPO "REPO.exe"))) { Write-Host "That folder has no REPO.exe. Aborting." -ForegroundColor Red; exit 1 }
 Write-Host "R.E.P.O: $REPO"
@@ -81,7 +81,7 @@ if (-not $hasScaler) {
 
 # --- Migrate off the OLD name (Puppeteer -> LiveReins) ---
 # Before the rename the mod installed as PuppeteerMod. If BOTH load they fight over the
-# command-server port 17385 (the second one errors out and commands stop) — so an existing
+# command-server port 17385 (the second one errors out and commands stop) - so an existing
 # install would keep showing "PuppeteerMod". Drop the old folder, any flat DLL, and the old
 # BepInEx config so only LiveReins remains. Safe no-op when none of them are present.
 Write-Host "Removing the old Puppeteer mod if present..." -ForegroundColor Cyan
