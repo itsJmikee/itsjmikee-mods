@@ -1,8 +1,8 @@
 # LiveReins co-op partner installer. Finds R.E.P.O, installs BepInEx + ScalerCore if
 # missing, pulls the host's latest LiveReins mods, then launches the game.
-# Pass -RepoPath "C:\...\REPO" (or set PUPPETEER_REPO) to FORCE the folder — use the one
+# Pass -RepoPath "C:\...\REPO" (or set LIVEREINS_REPO) to FORCE the folder — use the one
 # Steam shows under "Browse local files", since a hand-moved game won't be auto-found.
-param([string]$RepoPath = $env:PUPPETEER_REPO)
+param([string]$RepoPath = $env:LIVEREINS_REPO)
 $ErrorActionPreference = "Stop"
 $RAW   = "https://raw.githubusercontent.com/itsJmikee/itsjmikee-mods/main/repo"
 $APPID = "3241660"   # R.E.P.O Steam app id
@@ -78,6 +78,16 @@ if (-not $hasScaler) {
     Remove-Item $sz -Force; Remove-Item $ext -Recurse -Force
   } catch { Write-Host "ScalerCore auto-install failed ($($_.Exception.Message)). Install 'ScalerCore' from Thunderstore manually." -ForegroundColor Yellow }
 } else { Write-Host "ScalerCore already installed." }
+
+# --- Migrate off the OLD name (Puppeteer -> LiveReins) ---
+# Before the rename the mod installed as PuppeteerMod. If BOTH load they fight over the
+# command-server port 17385 (the second one errors out and commands stop) — so an existing
+# install would keep showing "PuppeteerMod". Drop the old folder, any flat DLL, and the old
+# BepInEx config so only LiveReins remains. Safe no-op when none of them are present.
+Write-Host "Removing the old Puppeteer mod if present..." -ForegroundColor Cyan
+Remove-Item (Join-Path $plugins "PuppeteerMod") -Recurse -Force -ErrorAction SilentlyContinue
+Get-ChildItem $plugins -Recurse -Filter "PuppeteerMod.dll" -ErrorAction SilentlyContinue | ForEach-Object { Remove-Item $_.FullName -Force -ErrorAction SilentlyContinue }
+Remove-Item (Join-Path $REPO "BepInEx\config\com.jmike.puppeteer.cfg") -Force -ErrorAction SilentlyContinue
 
 # --- LiveReins mods (always pull the host's latest) ---
 Write-Host "Updating LiveReins mods..." -ForegroundColor Cyan
